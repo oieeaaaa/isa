@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:isa/helpers/dbProvider.dart';
 
+import './widgets/IsaAppBar.dart';
+
 class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -10,15 +12,8 @@ class App extends StatelessWidget {
     // db initialization
     dbIsa.initDB().then((res) => print('DB connection established ✨'));
 
-    dbIsa.getItems().then((res) => print(res));
-
     return Scaffold(
-      appBar: AppBar(
-          title: Text('ISA',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontWeight: FontWeight.w700,
-              ))),
+      appBar: IsaAppBar(title: 'ISA'),
       body: Center(
         child: Text('Inventory system application',
             style: TextStyle(

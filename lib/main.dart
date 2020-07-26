@@ -17,6 +17,17 @@ void main() {
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       fontFamily: 'Avenir',
+      textTheme: TextTheme(
+        bodyText1: TextStyle(
+          fontFamily: 'Avenir',
+          fontSize: 16,
+        ),
+        bodyText2: TextStyle(
+          fontFamily: 'Avenir',
+          fontWeight: FontWeight.w700,
+          fontSize: 16,
+        ),
+      ),
       primaryColor: primary,
       accentColor: dimmed,
     ),
