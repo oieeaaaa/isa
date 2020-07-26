@@ -1,44 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:isa/helpers/dbProvider.dart';
+import './App.dart';
 
 void main() {
-  runApp(MyApp());
-}
+  // =========================================================================
+  // THEME COLORS
+  // =========================================================================
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    DBProvider dbIsa = DBProvider();
+  final primary = Color(0xff222222);
+  final dimmed = Color(0xff838383);
 
-    // db initialization
-    dbIsa.initDB().then((res) => print('DB connection established ✨'));
+  // =========================================================================
+  // ENTRY POINT
+  // =========================================================================
 
-    dbIsa.getItems().then((res) => print(res));
-
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Column(
-        children: <Widget>[
-          Text('Hello world'),
-        ],
-      ),
-    );
-  }
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      fontFamily: 'Avenir',
+      primaryColor: primary,
+      accentColor: dimmed,
+    ),
+    home: App(),
+  ));
 }
