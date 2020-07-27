@@ -95,11 +95,13 @@ class DBProvider {
   }
 
   // get items
-  Future<List> getItems() async {
+  Future<List> getItems(date) async {
     Database db = await this.db;
 
     List<Map<String, dynamic>> result = await db.query(
       tableName,
+      where: '$createdAt >= ?',
+      whereArgs: [date],
       orderBy: 'createdAt asc',
     );
 

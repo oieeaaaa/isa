@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './IsaListViewHeader.dart';
+import './IsaListViewHeading.dart';
 import './IsaListViewItem.dart';
 import '../helpers/dbProvider.dart';
 
@@ -7,11 +8,40 @@ import '../helpers/dbProvider.dart';
 // Isa ListView
 // =========================================================================
 
-class IsaListView extends StatelessWidget {
+class IsaListView extends StatefulWidget {
+  @override
+  _IsaListViewState createState() => _IsaListViewState();
+}
+
+// =========================================================================
+// Isa ListView State
+// =========================================================================
+
+class _IsaListViewState extends State<IsaListView> {
+  DBProvider dbIsa = DBProvider();
+  List items;
+
+  @override
+  void initState() {
+    super.initState();
+
+    this.fetchItems(DateTime.now().toString());
+  }
+
+  Future<void> fetchItems(date) async {
+    final response = await dbIsa.getItems(date);
+
+    print('RESPONSE: $response');
+
+    setState(() {
+      items = response;
+    });
+  }
+
   generateItems(data) {
     return data.map<Widget>((item) {
-      print(item);
       return Column(children: [
+        // TODO: Change this network image to base64 converted image
         IsaListViewItem('https://bit.ly/32YvgYy', item['name'] ?? 'N/A',
                 item['price'].toString()) ??
             '0.00',
@@ -22,32 +52,16 @@ class IsaListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DBProvider dbIsa = DBProvider();
-
     return ListView(
       children: [
+        IsaListViewHeader(this.fetchItems),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          IsaListViewHeader('image', 0.1449275362),
-          IsaListViewHeader('name', 0.38647343),
-          IsaListViewHeader('price', 0.193236715, TextAlign.end),
+          IsaListViewHeading('image', 0.1449275362),
+          IsaListViewHeading('name', 0.38647343),
+          IsaListViewHeading('price', 0.193236715, TextAlign.end),
         ]),
         SizedBox(height: 20),
-        FutureBuilder(
-          future: dbIsa.getItems(),
-          builder: (context, snapshot) {
-            List<Widget> children;
-
-            if (snapshot.connectionState == ConnectionState.done) {
-              children = generateItems(snapshot.data);
-            } else {
-              return CircularProgressIndicator();
-            }
-
-            return Column(
-              children: children,
-            );
-          },
-        )
+        if (items != null) ...generateItems(items)
       ],
     );
   }
