@@ -30,11 +30,9 @@ class _IsaAppBarState extends State<IsaAppBar> {
         title: Align(
             alignment: Alignment.topLeft,
             child: Text(title,
-                style: TextStyle(
-                  fontFamily: 'Avenir',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: Colors.white,
-                ))));
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText2
+                    .copyWith(color: Colors.white))));
   }
 }
