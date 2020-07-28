@@ -26,6 +26,7 @@ class _IsaAppBarState extends State<IsaAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).primaryColor,
         title: Align(
             alignment: Alignment.topLeft,

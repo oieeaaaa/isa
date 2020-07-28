@@ -31,8 +31,6 @@ class _IsaListViewState extends State<IsaListView> {
   Future<void> fetchItems(date) async {
     final response = await dbIsa.getItems(date);
 
-    print('RESPONSE: $response');
-
     setState(() {
       items = response;
     });
