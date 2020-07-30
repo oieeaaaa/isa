@@ -25,7 +25,9 @@ dependencies:
     sdk: flutter
   sqflite: any
   path_provider: any
+  path: any
   intl: ^0.16.1
+  camera: ^0.5.8+2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -64,11 +66,14 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Avenir
-      fonts:
-        - asset: assets/fonts/Avenir-Book.woff2
-        - asset: assets/fonts/Avenir-Heavy.woff2
-          weight: 700
+  - family: Avenir
+    fonts:
+    - asset: assets/fonts/Avenir-Book.woff
+    - asset: assets/fonts/Avenir-Book.woff2
+    - asset: assets/fonts/Avenir-Heavy.woff
+      weight: 700
+    - asset: assets/fonts/Avenir-Heavy.woff2
+      weight: 700
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
