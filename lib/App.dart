@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:isa/helpers/dbProvider.dart';
-
 import './screens/ItemForm.dart';
 import './widgets/IsaAppBar.dart';
 import './widgets/IsaListView.dart';
@@ -10,17 +8,16 @@ import './widgets/IsaListView.dart';
 // =========================================================================
 
 class App extends StatelessWidget {
+  final camera;
+
+  App(this.camera);
+
   @override
   Widget build(BuildContext context) {
-    DBProvider dbIsa = DBProvider();
-
     void navigateToItemForm() async {
       await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ItemForm()));
+          context, MaterialPageRoute(builder: (context) => ItemForm(camera)));
     }
-
-    // db initialization
-    dbIsa.initDB().then((res) => print('DB connection established ✨'));
 
     return Scaffold(
         appBar: IsaAppBar(title: 'ISA'),

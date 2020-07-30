@@ -6,7 +6,7 @@ class Item {
   // item details
   int _id;
   String _name;
-  int _price;
+  double _price;
   String _imageUrl;
 
   // customer information
@@ -41,7 +41,7 @@ class Item {
 
   int get id => _id;
   String get name => _name;
-  int get price => _price;
+  double get price => _price;
   String get imageUrl => _imageUrl;
   String get customerName => _customerName;
   String get customerContactNumber => _customerContactNumber;
@@ -58,7 +58,7 @@ class Item {
     }
   }
 
-  set price(int newPrice) {
+  set price(double newPrice) {
     if (newPrice > 0) {
       _price = newPrice;
     }

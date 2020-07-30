@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import './IsaListViewHeader.dart';
 import './IsaListViewHeading.dart';
 import './IsaListViewItem.dart';
@@ -39,8 +40,7 @@ class _IsaListViewState extends State<IsaListView> {
   generateItems(data) {
     return data.map<Widget>((item) {
       return Column(children: [
-        // TODO: Change this network image to base64 converted image
-        IsaListViewItem('https://bit.ly/32YvgYy', item['name'] ?? 'N/A',
+        IsaListViewItem(item['imageUrl'], item['name'] ?? 'N/A',
                 item['price'].toString()) ??
             '0.00',
         SizedBox(height: 20),

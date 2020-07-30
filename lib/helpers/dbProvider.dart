@@ -98,9 +98,10 @@ class DBProvider {
   Future<List> getItems(date) async {
     Database db = await this.db;
 
+    //TODO: Enclosed the createdAt filter with the $date and yesterday's date
     List<Map<String, dynamic>> result = await db.query(
       tableName,
-      where: '$createdAt >= ?',
+      where: '$createdAt <= ?',
       whereArgs: [date],
       orderBy: 'createdAt asc',
     );
