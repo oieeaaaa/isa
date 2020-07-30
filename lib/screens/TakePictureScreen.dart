@@ -90,7 +90,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ItemForm(widget.camera, path),
+                builder: (context) => ItemForm(path),
               ),
             );
           } catch (e) {

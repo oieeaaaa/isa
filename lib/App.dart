@@ -8,15 +8,11 @@ import './widgets/IsaListView.dart';
 // =========================================================================
 
 class App extends StatelessWidget {
-  final camera;
-
-  App(this.camera);
-
   @override
   Widget build(BuildContext context) {
     void navigateToItemForm() async {
       await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ItemForm(camera)));
+          context, MaterialPageRoute(builder: (context) => ItemForm()));
     }
 
     return Scaffold(

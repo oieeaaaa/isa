@@ -1,20 +1,34 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:provider/provider.dart';
 
 import 'package:isa/helpers/dbProvider.dart';
 
 import './App.dart';
 
+// =========================================================================
+// MainModel ChangeNotifier
+// =========================================================================
+
+class MainModel extends ChangeNotifier {
+  // Obtain a list of the available cameras on the device.
+  CameraDescription camera = CameraDescription();
+
+  MainModel() {
+    availableCameras().then((cameras) {
+      this.camera = cameras.first;
+    });
+  }
+}
+
+// ============================================================================
+// Main
+// ============================================================================
+
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Obtain a list of the available cameras on the device.
-  final cameras = await availableCameras();
-
-  // Get a specific camera from the list of available cameras.
-  final camera = cameras.first;
 
   // =========================================================================
   // THEME COLORS
@@ -32,24 +46,27 @@ Future<void> main() async {
   // db initialization
   dbIsa.initDB().then((res) => print('DB connection established ✨'));
 
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      fontFamily: 'Avenir',
-      textTheme: TextTheme(
-        bodyText1: TextStyle(
-          fontFamily: 'Avenir',
-          fontSize: 16,
+  runApp(ChangeNotifierProvider(
+    create: (_) => MainModel(),
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Avenir',
+        textTheme: TextTheme(
+          bodyText1: TextStyle(
+            fontFamily: 'Avenir',
+            fontSize: 16,
+          ),
+          bodyText2: TextStyle(
+            fontFamily: 'Avenir',
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
         ),
-        bodyText2: TextStyle(
-          fontFamily: 'Avenir',
-          fontWeight: FontWeight.w700,
-          fontSize: 16,
-        ),
+        primaryColor: primary,
+        accentColor: dimmed,
       ),
-      primaryColor: primary,
-      accentColor: dimmed,
+      home: App(),
     ),
-    home: App(camera),
   ));
 }

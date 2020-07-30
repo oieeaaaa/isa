@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 import '../screens/TakePictureScreen.dart';
 
 // =========================================================================
@@ -9,10 +11,9 @@ import '../screens/TakePictureScreen.dart';
 // =========================================================================
 
 class IsaImageInput extends StatelessWidget {
-  final CameraDescription camera;
   final imagePath;
 
-  IsaImageInput(this.camera, this.imagePath);
+  IsaImageInput(this.imagePath);
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +21,11 @@ class IsaImageInput extends StatelessWidget {
     void navigateToTakePictureScreen() {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => TakePictureScreen(camera: this.camera),
-        ),
+        MaterialPageRoute(builder: (context) {
+          return Consumer<MainModel>(builder: (context, main, child) {
+            return TakePictureScreen(camera: main.camera);
+          });
+        }),
       );
     }
 

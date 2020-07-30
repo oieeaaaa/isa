@@ -13,10 +13,9 @@ import '../widgets/IsaImageInput.dart';
 // =========================================================================
 
 class ItemForm extends StatefulWidget {
-  final camera;
   final imagePath;
 
-  ItemForm(this.camera, [this.imagePath]);
+  ItemForm([this.imagePath]);
 
   @override
   _ItemFormState createState() => _ItemFormState();
@@ -88,8 +87,8 @@ class _ItemFormState extends State<ItemForm> {
       );
 
       dbIsa.insertItem(data).then((result) => {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => App(widget.camera)))
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => App()))
           });
     }
   }
@@ -144,7 +143,7 @@ class _ItemFormState extends State<ItemForm> {
                 SizedBox(height: 20),
 
                 // image input
-                IsaImageInput(widget.camera, widget.imagePath),
+                IsaImageInput(widget.imagePath),
 
                 SizedBox(height: 20),
 
