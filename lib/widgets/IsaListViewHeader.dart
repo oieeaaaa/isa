@@ -49,10 +49,14 @@ class _IsaListViewHeaderState extends State<IsaListViewHeader> {
 
     return Container(
       margin: EdgeInsets.only(top: 30, bottom: 47),
-      child: Row(
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        alignment: WrapAlignment.start,
+        spacing: 20,
+        runSpacing: 20,
+        direction: Axis.horizontal,
         children: [
           Text('Date:'),
-          SizedBox(width: 15),
           OutlineButton(
             padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
             child: Text(dateFormat.format(selectedDate).toString(),
@@ -60,7 +64,6 @@ class _IsaListViewHeaderState extends State<IsaListViewHeader> {
             borderSide: BorderSide(color: Theme.of(context).primaryColor),
             onPressed: handleSelectDate,
           ),
-          SizedBox(width: 20),
           FlatButton(
             padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
             color: Theme.of(context).accentColor,
