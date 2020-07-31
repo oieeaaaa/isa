@@ -1,10 +1,9 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 
-// custom package
 import 'package:isa/models/Item.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DBProvider {
   // =========================================================================
@@ -97,33 +96,59 @@ class DBProvider {
   // get items
   Future<List> getItems(date) async {
     Database db = await this.db;
+    DateTime today = DateTime.now();
 
-    //TODO: Enclosed the createdAt filter with the $date and yesterday's date
+    // get yeterday's date starting from 00:00 or 12 midnight
+    DateTime yeterdayFrom12mn = today
+        .subtract(Duration(days: 2, hours: today.hour, minutes: today.minute));
+
     List<Map<String, dynamic>> result = await db.query(
       tableName,
-      where: '$createdAt <= ?',
-      whereArgs: [date],
+      where: '$createdAt <= ? and $createdAt >= ?',
+      whereArgs: [date, yeterdayFrom12mn.toString()],
       orderBy: 'createdAt asc',
     );
 
     return result;
   }
 
+  // get one item
+  Future getItem(int itemId) async {
+    Database db = await this.db;
+
+    var result = await db.query(
+      tableName,
+      where: '$id = ?',
+      whereArgs: [itemId],
+    );
+
+    return result[0];
+  }
+
   // update item
   Future<int> updateItem(Item item) async {
     Database db = await this.db;
 
-    var result = await db.update(tableName, item.toMap(),
-        where: '$id = ?', whereArgs: [item.id]);
+    var itemResult = await this.getItem(item.id);
+
+    var result = await db.update(
+        tableName,
+        {
+          ...item.toMap(),
+          'createdAt': itemResult['createdAt'],
+        },
+        where: '$id = ?',
+        whereArgs: [item.id]);
 
     return result;
   }
 
   // delete item
-  Future<int> deleteItem(int id) async {
+  Future<int> deleteItem(int itemId) async {
     Database db = await this.db;
 
-    var result = await db.delete(tableName, where: '$id = ?', whereArgs: [id]);
+    var result =
+        await db.delete(tableName, where: '$id = ?', whereArgs: [itemId]);
 
     return result;
   }
