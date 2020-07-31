@@ -29,7 +29,7 @@ class Item {
       this._notes]);
 
   // with id
-  Item.withId(this._name, this._price, this._createdAt,
+  Item.withId(this._id, this._name, this._price,
       [this._imageUrl,
       this._customerName,
       this._customerContactNumber,
