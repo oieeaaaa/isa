@@ -4,6 +4,7 @@ import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 import './IsaListViewHeader.dart';
 import './IsaListViewHeading.dart';
@@ -26,12 +27,15 @@ class IsaListView extends StatefulWidget {
 class _IsaListViewState extends State<IsaListView> {
   DBProvider dbIsa = DBProvider();
   List items;
+  DateFormat dateFormat = DateFormat.yMd();
+
+  TextEditingController emailCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        IsaListViewHeader(this.fetchItems),
+        IsaListViewHeader(this.fetchItems, this.sendReport),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           IsaListViewHeading('image', 0.1449275362),
           IsaListViewHeading('name', 0.38647343),
@@ -45,10 +49,6 @@ class _IsaListViewState extends State<IsaListView> {
 
   Future<void> fetchItems(date) async {
     final response = await dbIsa.getItems(date);
-
-    // TODO: remove this later
-    // for testing purposes only
-    exportToCsv(response);
 
     setState(() {
       items = response;
@@ -66,20 +66,18 @@ class _IsaListViewState extends State<IsaListView> {
     }).toList();
   }
 
-  void exportToCsv(data) async {
-    DateFormat dateFormat = DateFormat.yMd();
-
+  Future sendToEmail() async {
     // convert map to list
     // because csv accepts nested list
-    List<List<dynamic>> listItems = List.generate(data.length, (index) {
+    List<List<dynamic>> listItems = List.generate(items.length, (index) {
       return ([
-        data[index]['id'],
-        data[index]['name'],
-        data[index]['price'],
-        data[index]['customerName'],
-        data[index]['customerContactNumber'],
-        data[index]['notes'],
-        dateFormat.format(DateTime.parse(data[index]['createdAt'])),
+        items[index]['id'],
+        items[index]['name'],
+        items[index]['price'],
+        items[index]['customerName'],
+        items[index]['customerContactNumber'],
+        items[index]['notes'],
+        dateFormat.format(DateTime.parse(items[index]['createdAt'])),
       ]);
     });
 
@@ -102,10 +100,126 @@ class _IsaListViewState extends State<IsaListView> {
     final String path = '$dir/report.csv';
     final File file = File(path);
 
-    // TODO: send this file via email
-    final report = await file.writeAsString(csv);
+    // write the data
+    await file.writeAsString(csv);
 
-    print(report);
+    final Email email = Email(
+      body: 'See the attachment',
+      subject: 'Sales report',
+      recipients: [emailCtrl.text],
+      attachmentPaths: [path],
+      isHTML: false,
+    );
+
+    try {
+      await FlutterEmailSender.send(email);
+
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+                title: Text('Email is sent to ${emailCtrl.text} ✅',
+                    style: Theme.of(context).textTheme.bodyText1));
+          });
+    } catch (error) {
+      print(error.toString());
+    }
+
+    Navigator.of(context).pop();
+  }
+
+  void sendReport(DateTime selectedDate) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: SingleChildScrollView(
+            child: AlertDialog(
+              contentPadding: EdgeInsets.only(top: 30, left: 30, right: 30),
+              titlePadding: EdgeInsets.only(left: 30, right: 30, top: 30),
+              actionsPadding: EdgeInsets.only(left: 30, right: 30, bottom: 30),
+              title: Row(
+                children: [
+                  Text('Send Report:',
+                      style: Theme.of(context).textTheme.bodyText1),
+                  SizedBox(width: 5),
+                  Text(dateFormat.format(selectedDate),
+                      style: Theme.of(context).textTheme.bodyText2)
+                ],
+              ),
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.8550724638,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('To:', style: Theme.of(context).textTheme.bodyText1),
+                    SizedBox(height: 10),
+                    TextField(
+                        controller: emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .copyWith(color: Theme.of(context).accentColor),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).accentColor, width: 1),
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 14),
+                        )),
+                    SizedBox(height: 196),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.28,
+                            height: 50,
+                            child: FlatButton(
+                              splashColor: Colors.red.withAlpha(50),
+                              color: Colors.transparent,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('Cancel',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText2
+                                      .copyWith(
+                                          color:
+                                              Theme.of(context).accentColor)),
+                            ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.28,
+                            height: 50,
+                            child: FlatButton(
+                              splashColor: Colors.white.withAlpha(100),
+                              color: Theme.of(context).primaryColor,
+                              onPressed: sendToEmail,
+                              child: Text('Send',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText2
+                                      .copyWith(color: Colors.white)),
+                            ),
+                          )
+                        ]),
+                    SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override

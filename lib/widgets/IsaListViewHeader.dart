@@ -7,8 +7,9 @@ import 'package:intl/intl.dart';
 
 class IsaListViewHeader extends StatefulWidget {
   final fetchItems;
+  final sendReport;
 
-  IsaListViewHeader(this.fetchItems);
+  IsaListViewHeader(this.fetchItems, this.sendReport);
 
   @override
   _IsaListViewHeaderState createState() => _IsaListViewHeaderState();
@@ -38,11 +39,6 @@ class _IsaListViewHeaderState extends State<IsaListViewHeader> {
     }
   }
 
-  // send report handler
-  void handleSendReport() {
-    print('Send report!');
-  }
-
   @override
   Widget build(BuildContext context) {
     DateFormat dateFormat = DateFormat.yMd();
@@ -67,7 +63,7 @@ class _IsaListViewHeaderState extends State<IsaListViewHeader> {
           FlatButton(
             padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
             color: Theme.of(context).accentColor,
-            onPressed: handleSendReport,
+            onPressed: () => widget.sendReport(selectedDate),
             child: Text('Send Report',
                 style: Theme.of(context)
                     .textTheme
