@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,9 +9,10 @@ import '../screens/TakePictureScreen.dart';
 // =========================================================================
 
 class IsaImageInput extends StatelessWidget {
-  final imagePath;
+  final imageBytes;
+  final int id;
 
-  IsaImageInput(this.imagePath);
+  IsaImageInput(this.id, this.imageBytes);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +22,7 @@ class IsaImageInput extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) {
           return Consumer<MainModel>(builder: (context, main, child) {
-            return TakePictureScreen(camera: main.camera);
+            return TakePictureScreen(id: this.id, camera: main.camera);
           });
         }),
       );
@@ -38,11 +37,10 @@ class IsaImageInput extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: Theme.of(context).primaryColor),
               ),
-              child: (this.imagePath == null)
+              child: (this.imageBytes == null)
                   ? Icon(Icons.camera_alt, size: 32)
                   : FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image.file(File(this.imagePath)))),
+                      fit: BoxFit.cover, child: Image.memory(imageBytes))),
           SizedBox(width: 20),
           OutlineButton(
             padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
@@ -50,7 +48,7 @@ class IsaImageInput extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             onPressed: navigateToTakePictureScreen,
-            child: Text('Capture Image',
+            child: Text(this.id == null ? 'Capture Image' : 'Update Image',
                 style: Theme.of(context)
                     .textTheme
                     .bodyText2

@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'dart:io';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+
 import '../App.dart';
 import '../helpers/dbProvider.dart';
 import '../models/Item.dart';
@@ -13,9 +14,14 @@ import '../widgets/IsaImageInput.dart';
 // =========================================================================
 
 class ItemForm extends StatefulWidget {
-  final imagePath;
+  final imageBytes;
 
-  ItemForm([this.imagePath]);
+  // if this exists it means
+  // that we are on edit form
+  // else it will be on add form
+  final int id;
+
+  ItemForm([this.id, this.imageBytes]);
 
   @override
   _ItemFormState createState() => _ItemFormState();
@@ -27,71 +33,15 @@ class ItemForm extends StatefulWidget {
 
 class _ItemFormState extends State<ItemForm> {
   DBProvider dbIsa = DBProvider();
+  var image;
   final _itemFormKey = GlobalKey<FormState>();
 
   // Ctrl stands for Controller
   TextEditingController nameCtrl = TextEditingController();
   TextEditingController priceCtrl = TextEditingController();
-  TextEditingController customerFullNameCtrl = TextEditingController();
+  TextEditingController customerNameCtrl = TextEditingController();
   TextEditingController customerContactNumberCtrl = TextEditingController();
   TextEditingController notesCtrl = TextEditingController();
-
-  // name validator
-  String nameValidator(String text) {
-    if (text.isEmpty) {
-      return 'Product name is required.';
-    }
-
-    return null;
-  }
-
-  // price validator
-  String priceValidator(String text) {
-    if (text.isEmpty) {
-      return 'Price is required.';
-    }
-
-    return null;
-  }
-
-  // contact number validator
-  String contactNumberValidator(String text) {
-    if (text.length != 11) {
-      return 'Contact number digits must be equal to 11';
-    }
-
-    return null;
-  }
-
-  // save handler
-  void handleSave() async {
-    if (_itemFormKey.currentState.validate()) {
-      String imageUrl = '';
-
-      if (widget.imagePath != null) {
-        List<int> bytes = File(widget.imagePath).readAsBytesSync();
-        imageUrl = base64.encode(bytes);
-      }
-
-      Item data = Item(
-        // required fields
-        nameCtrl.text,
-        double.parse(priceCtrl.text),
-        DateTime.now().toString(),
-
-        // optional fields
-        imageUrl,
-        customerFullNameCtrl.text,
-        customerContactNumberCtrl.text,
-        notesCtrl.text,
-      );
-
-      dbIsa.insertItem(data).then((result) => {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => App()))
-          });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +79,7 @@ class _ItemFormState extends State<ItemForm> {
         body: Form(
           key: _itemFormKey,
           child: Container(
-            margin: EdgeInsets.only(left: 30, right: 30, bottom: 50),
+            margin: EdgeInsets.only(left: 30, right: 30),
             child: ListView(
               children: <Widget>[
                 // go back
@@ -143,7 +93,7 @@ class _ItemFormState extends State<ItemForm> {
                 SizedBox(height: 20),
 
                 // image input
-                IsaImageInput(widget.imagePath),
+                IsaImageInput(widget.id, image),
 
                 SizedBox(height: 20),
 
@@ -189,7 +139,7 @@ class _ItemFormState extends State<ItemForm> {
 
                 // customer's full name
                 TextFormField(
-                  controller: customerFullNameCtrl,
+                  controller: customerNameCtrl,
                   style: Theme.of(context).textTheme.bodyText1,
                   decoration: inputDecoration('Full name'),
                 ),
@@ -223,27 +173,194 @@ class _ItemFormState extends State<ItemForm> {
 
                 SizedBox(height: 40),
 
-                // save button
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                    width: 142,
-                    height: 50,
-                    child: FlatButton(
-                      splashColor: Colors.white.withAlpha(100),
-                      color: Theme.of(context).primaryColor,
-                      onPressed: handleSave,
-                      child: Text('Save',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText2
-                              .copyWith(color: Colors.white)),
+                // on save
+                if (widget.id == null)
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      width: 142,
+                      height: 50,
+                      child: FlatButton(
+                        splashColor: Colors.white.withAlpha(100),
+                        color: Theme.of(context).primaryColor,
+                        onPressed: handleSave,
+                        child: Text('Save',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText2
+                                .copyWith(color: Colors.white)),
+                      ),
                     ),
                   ),
-                ),
+
+                // on update/delete
+                if (widget.id != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                        width: 142,
+                        height: 50,
+                        child: FlatButton(
+                          splashColor: Colors.white.withAlpha(100),
+                          color: Theme.of(context).primaryColor,
+                          onPressed: handleUpdate,
+                          child: Text('Update',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(color: Colors.white)),
+                        ),
+                      ),
+                      Container(
+                        width: 142,
+                        height: 50,
+                        child: FlatButton(
+                          splashColor: Colors.white.withAlpha(100),
+                          color: Theme.of(context).accentColor,
+                          onPressed: handleDelete,
+                          child: Text('Delete',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                // margin bottom
+                SizedBox(height: 30),
               ],
             ),
           ),
         ));
+  }
+
+  String contactNumberValidator(String text) {
+    if (text.length != 11) {
+      return 'Contact number digits must be equal to 11';
+    }
+
+    return null;
+  }
+
+  void handleSave() async {
+    if (_itemFormKey.currentState.validate()) {
+      var encodedImage;
+
+      if (image != null) {
+        encodedImage = base64.encode(image);
+      }
+
+      Item data = Item(
+        // required fields
+        nameCtrl.text,
+        double.parse(priceCtrl.text),
+        DateTime.now().toString(),
+
+        // optional fields
+
+        encodedImage,
+        customerNameCtrl.text,
+        customerContactNumberCtrl.text,
+        notesCtrl.text,
+      );
+
+      var result = await dbIsa.insertItem(data);
+
+      if (result != null) {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => App()));
+      }
+    }
+  }
+
+  void handleUpdate() async {
+    if (_itemFormKey.currentState.validate()) {
+      var encodedImage = base64.encode(image);
+
+      Item data = Item.withId(
+        // required fields
+        widget.id,
+        nameCtrl.text,
+        double.parse(priceCtrl.text),
+
+        // optional fields
+        encodedImage,
+        customerNameCtrl.text,
+        customerContactNumberCtrl.text,
+        notesCtrl.text,
+      );
+
+      var result = await dbIsa.updateItem(data);
+
+      if (result != null) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+              title: Text('Successfully updated ${nameCtrl.text} ✅',
+                  style: Theme.of(context).textTheme.bodyText2)),
+        );
+      }
+    }
+  }
+
+  void handleDelete() async {
+    var result = await dbIsa.deleteItem(widget.id);
+
+    if (result != null) {
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Deleted ${nameCtrl.text} 🔥'),
+        ),
+      );
+
+      // go back
+      Navigator.push(context, MaterialPageRoute(builder: (context) => App()));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.id != null) {
+      dbIsa.getItem(widget.id).then((result) {
+        nameCtrl.text = result['name'];
+        priceCtrl.text = result['price'].toString();
+        customerNameCtrl.text = result['customerName'];
+        customerContactNumberCtrl.text = result['customerContactNumber'];
+        notesCtrl.text = result['notes'];
+
+        setState(() {
+          image = widget.imageBytes != null
+              ? widget.imageBytes
+              : Base64Decoder().convert(result['imageUrl']);
+        });
+      });
+    }
+
+    if (widget.imageBytes != null && widget.id == null) {
+      setState(() {
+        image = widget.imageBytes;
+      });
+    }
+  }
+
+  String nameValidator(String text) {
+    if (text.isEmpty) {
+      return 'Product name is required.';
+    }
+
+    return null;
+  }
+
+  String priceValidator(String text) {
+    if (text.isEmpty) {
+      return 'Price is required.';
+    }
+
+    return null;
   }
 }

@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 
@@ -11,9 +13,11 @@ import './ItemForm.dart';
 
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
+  final int id;
 
   const TakePictureScreen({
     Key key,
+    this.id,
     @required this.camera,
   }) : super(key: key);
 
@@ -86,11 +90,13 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
             // Attempt to take a picture and log where it's been saved.
             await _controller.takePicture(path);
 
+            List<int> image = File(path).readAsBytesSync();
+
             // If the picture was taken, display it on a new screen.
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ItemForm(path),
+                builder: (context) => ItemForm(widget.id, image),
               ),
             );
           } catch (e) {
