@@ -38,7 +38,8 @@ class _ItemFormState extends State<ItemForm> {
 
   // Ctrl stands for Controller
   TextEditingController nameCtrl = TextEditingController();
-  TextEditingController priceCtrl = TextEditingController();
+  TextEditingController priceCtrl = TextEditingController.fromValue(
+      TextEditingValue(text: '0')); // with an initial value
   TextEditingController customerNameCtrl = TextEditingController();
   TextEditingController customerContactNumberCtrl = TextEditingController();
   TextEditingController notesCtrl = TextEditingController();
@@ -114,7 +115,6 @@ class _ItemFormState extends State<ItemForm> {
                       width: 177,
                       child: TextFormField(
                         controller: priceCtrl,
-                        validator: priceValidator,
                         style: Theme.of(context).textTheme.bodyText1,
                         keyboardType:
                             TextInputType.numberWithOptions(decimal: true),
@@ -238,6 +238,8 @@ class _ItemFormState extends State<ItemForm> {
   }
 
   String contactNumberValidator(String text) {
+    if (text.length == 0) return null;
+
     if (text.length != 11) {
       return 'Contact number digits must be equal to 11';
     }
@@ -277,7 +279,11 @@ class _ItemFormState extends State<ItemForm> {
 
   void handleUpdate() async {
     if (_itemFormKey.currentState.validate()) {
-      var encodedImage = base64.encode(image);
+      var encodedImage;
+
+      if (image != null) {
+        encodedImage = base64.encode(image);
+      }
 
       Item data = Item.withId(
         // required fields
@@ -294,14 +300,15 @@ class _ItemFormState extends State<ItemForm> {
 
       var result = await dbIsa.updateItem(data);
 
-      if (result != null) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-              title: Text('Successfully updated ${nameCtrl.text} ✅',
-                  style: Theme.of(context).textTheme.bodyText2)),
-        );
-      }
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+            title: Text(
+                (result != null)
+                    ? 'Updated ${nameCtrl.text} ✅'
+                    : 'Failed to update ${nameCtrl.text} ☹️',
+                style: Theme.of(context).textTheme.bodyText2)),
+      );
     }
   }
 
@@ -351,14 +358,6 @@ class _ItemFormState extends State<ItemForm> {
   String nameValidator(String text) {
     if (text.isEmpty) {
       return 'Product name is required.';
-    }
-
-    return null;
-  }
-
-  String priceValidator(String text) {
-    if (text.isEmpty) {
-      return 'Price is required.';
     }
 
     return null;
