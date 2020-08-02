@@ -96,18 +96,17 @@ class DBProvider {
   }
 
   // get items
-  Future<List> getItems(date) async {
+  Future<List> getItems(List<DateTime> range) async {
     Database db = await this.db;
-    DateTime today = DateTime.now();
+    String startDate = range[0].toString();
+    String endDate = range[0].toString();
 
-    // get yeterday's date starting from 00:00 or 12 midnight
-    DateTime yeterdayFrom12mn = today
-        .subtract(Duration(days: 2, hours: today.hour, minutes: today.minute));
+    print(range);
 
     List<Map<String, dynamic>> result = await db.query(
       tableName,
-      where: '$createdAt <= ? and $createdAt >= ?',
-      whereArgs: [date, yeterdayFrom12mn.toString()],
+      where: '$createdAt >= ? and ? <= ?',
+      whereArgs: [startDate, startDate, endDate],
       orderBy: 'createdAt asc',
     );
 

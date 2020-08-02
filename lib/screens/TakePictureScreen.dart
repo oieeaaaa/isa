@@ -39,7 +39,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
 
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.medium,
+      ResolutionPreset.veryHigh,
     );
 
     _initializeControllerFuture = _controller.initialize();

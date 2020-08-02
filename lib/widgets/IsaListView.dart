@@ -26,8 +26,8 @@ class IsaListView extends StatefulWidget {
 
 class _IsaListViewState extends State<IsaListView> {
   DBProvider dbIsa = DBProvider();
-  List items;
-  DateFormat dateFormat = DateFormat.yMd();
+  List items = [];
+  DateFormat dateFormat = DateFormat.yMMMd();
 
   TextEditingController emailCtrl = TextEditingController();
 
@@ -42,7 +42,11 @@ class _IsaListViewState extends State<IsaListView> {
           IsaListViewHeading('price', 0.193236715, TextAlign.end),
         ]),
         SizedBox(height: 20),
-        if (items != null) ...generateItems(items)
+        if (items.length != 0) ...generateItems(items),
+        if (items.length == 0)
+          Text('No available items here',
+              style: Theme.of(context).textTheme.bodyText2.copyWith(
+                  fontSize: 20, color: Theme.of(context).accentColor)),
       ],
     );
   }
@@ -74,6 +78,7 @@ class _IsaListViewState extends State<IsaListView> {
         items[index]['id'],
         items[index]['name'],
         items[index]['price'],
+        items[index]['quantity'],
         items[index]['customerName'],
         items[index]['customerContactNumber'],
         items[index]['notes'],
@@ -84,15 +89,19 @@ class _IsaListViewState extends State<IsaListView> {
     // csv the first item on the list is the column header
     // the preceeding items are the values
     String csv = ListToCsvConverter().convert([
+      // csv headers
       [
         'ID',
         'Name',
         'Price',
+        'Quantity',
         'Customer Name',
         'Customer Contact Number',
         'Notes',
         'Date Created'
       ],
+
+      // csv values
       ...listItems,
     ]);
 
@@ -114,7 +123,7 @@ class _IsaListViewState extends State<IsaListView> {
     try {
       await FlutterEmailSender.send(email);
 
-      showDialog(
+      await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -125,26 +134,38 @@ class _IsaListViewState extends State<IsaListView> {
       print(error.toString());
     }
 
+    setState(() {
+      emailCtrl.text = '';
+    });
+
     Navigator.of(context).pop();
   }
 
-  void sendReport(DateTime selectedDate) async {
+  void sendReport(List<DateTime> selectedRange) async {
     showDialog(
       context: context,
       builder: (context) {
         return Center(
           child: SingleChildScrollView(
             child: AlertDialog(
-              contentPadding: EdgeInsets.only(top: 30, left: 30, right: 30),
-              titlePadding: EdgeInsets.only(left: 30, right: 30, top: 30),
-              actionsPadding: EdgeInsets.only(left: 30, right: 30, bottom: 30),
-              title: Row(
+              contentPadding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              titlePadding: EdgeInsets.only(left: 20, right: 20, top: 30),
+              actionsPadding: EdgeInsets.only(left: 20, right: 20, bottom: 30),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Send Report:',
-                      style: Theme.of(context).textTheme.bodyText1),
-                  SizedBox(width: 5),
-                  Text(dateFormat.format(selectedDate),
-                      style: Theme.of(context).textTheme.bodyText2)
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText1
+                          .copyWith(fontSize: 24)),
+                  SizedBox(height: 20),
+                  Text('Start Date: ${dateFormat.format(selectedRange[0])}',
+                      style: Theme.of(context).textTheme.bodyText2),
+                  SizedBox(height: 10),
+                  Text('End Date: ${dateFormat.format(selectedRange[1])}',
+                      style: Theme.of(context).textTheme.bodyText2),
                 ],
               ),
               content: Container(
@@ -226,6 +247,6 @@ class _IsaListViewState extends State<IsaListView> {
   void initState() {
     super.initState();
 
-    this.fetchItems(DateTime.now().toString());
+    this.fetchItems([DateTime.now(), (DateTime.now()).add(Duration(days: 7))]);
   }
 }

@@ -183,12 +183,12 @@ class _ItemFormState extends State<ItemForm> {
                   decoration: inputDecoration(''),
                 ),
 
-                SizedBox(height: 40),
+                SizedBox(height: 30),
 
                 // on save
                 if (widget.id == null)
                   Align(
-                    alignment: Alignment.bottomLeft,
+                    alignment: Alignment.bottomRight,
                     child: Container(
                       width: 142,
                       height: 50,
@@ -196,7 +196,7 @@ class _ItemFormState extends State<ItemForm> {
                         splashColor: Colors.white.withAlpha(100),
                         color: Theme.of(context).primaryColor,
                         onPressed: handleSave,
-                        child: Text('Save',
+                        child: Text('Add',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyText2

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRangePicker;
 
 // =========================================================================
 // Isa ListViewHeader
@@ -20,21 +21,25 @@ class IsaListViewHeader extends StatefulWidget {
 // =========================================================================
 
 class _IsaListViewHeaderState extends State<IsaListViewHeader> {
-  DateTime selectedDate = DateTime.now();
+  List<DateTime> selectedRange = [
+    DateTime.now(),
+    (DateTime.now()).add(Duration(days: 7))
+  ];
 
   // date select handler
-  void handleSelectDate() async {
-    DateTime newDate = await showDatePicker(
+  void handleSelectDateRange() async {
+    final List<DateTime> range = await DateRangePicker.showDatePicker(
         context: context,
-        firstDate: DateTime(2000),
-        initialDate: selectedDate,
-        lastDate: DateTime.now());
+        initialFirstDate: selectedRange[0],
+        initialLastDate: selectedRange[1],
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2050));
 
-    if (newDate != null) {
-      widget.fetchItems(newDate.toString());
+    if (range != null) {
+      widget.fetchItems([...range]);
 
       setState(() {
-        selectedDate = newDate;
+        selectedRange = range;
       });
     }
   }
@@ -45,30 +50,26 @@ class _IsaListViewHeaderState extends State<IsaListViewHeader> {
 
     return Container(
       margin: EdgeInsets.only(top: 30, bottom: 47),
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        alignment: WrapAlignment.start,
-        spacing: 20,
-        runSpacing: 20,
-        direction: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text('Date:'),
+          SizedBox(width: 10),
           OutlineButton(
-            padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
-            child: Text(dateFormat.format(selectedDate).toString(),
+            color: Theme.of(context).primaryColor,
+            padding: EdgeInsets.all(14),
+            child: Text(
+                '${dateFormat.format(selectedRange[0]).toString()} - ${dateFormat.format(selectedRange[1]).toString()}',
                 style: Theme.of(context).textTheme.bodyText2),
             borderSide: BorderSide(color: Theme.of(context).primaryColor),
-            onPressed: handleSelectDate,
+            onPressed: handleSelectDateRange,
           ),
-          FlatButton(
-            padding: EdgeInsets.symmetric(vertical: 14, horizontal: 26),
+          Spacer(),
+          IconButton(
+            constraints: BoxConstraints(maxHeight: 36),
             color: Theme.of(context).accentColor,
-            onPressed: () => widget.sendReport(selectedDate),
-            child: Text('Send Report',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText2
-                    .copyWith(color: Colors.white)),
+            icon: Icon(Icons.print),
+            onPressed: () => widget.sendReport(selectedRange),
           )
         ],
       ),
