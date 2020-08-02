@@ -44,6 +44,7 @@ class DBProvider {
   String name = 'name';
   String price = 'price';
   String imageUrl = 'imageUrl';
+  String quantity = 'quantity';
 
   // customer information
   String customerName = 'customerName';
@@ -70,9 +71,10 @@ class DBProvider {
     await db.execute('''
         create table $tableName(
           $id integer primary key, 
-          $name text, 
+          $name text not null, 
           $price decimal, 
           $imageUrl text, 
+          $quantity decimal, 
           $customerName text, 
           $customerContactNumber text, 
           $notes text, 

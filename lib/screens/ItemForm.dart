@@ -40,6 +40,8 @@ class _ItemFormState extends State<ItemForm> {
   TextEditingController nameCtrl = TextEditingController();
   TextEditingController priceCtrl = TextEditingController.fromValue(
       TextEditingValue(text: '0')); // with an initial value
+  TextEditingController quantityCtrl = TextEditingController.fromValue(
+      TextEditingValue(text: '0')); // with an initial value
   TextEditingController customerNameCtrl = TextEditingController();
   TextEditingController customerContactNumberCtrl = TextEditingController();
   TextEditingController notesCtrl = TextEditingController();
@@ -128,6 +130,16 @@ class _ItemFormState extends State<ItemForm> {
                             .bodyText1
                             .copyWith(color: Theme.of(context).primaryColor))
                   ],
+                ),
+
+                SizedBox(height: 20),
+
+                // quantity
+                TextFormField(
+                  controller: quantityCtrl,
+                  style: Theme.of(context).textTheme.bodyText1,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  decoration: inputDecoration('Quantity'),
                 ),
 
                 SizedBox(height: 40),
@@ -258,12 +270,13 @@ class _ItemFormState extends State<ItemForm> {
       Item data = Item(
         // required fields
         nameCtrl.text,
-        double.parse(priceCtrl.text),
         DateTime.now().toString(),
 
         // optional fields
 
+        double.parse(priceCtrl.text),
         encodedImage,
+        double.parse(quantityCtrl.text),
         customerNameCtrl.text,
         customerContactNumberCtrl.text,
         notesCtrl.text,
@@ -289,10 +302,11 @@ class _ItemFormState extends State<ItemForm> {
         // required fields
         widget.id,
         nameCtrl.text,
-        double.parse(priceCtrl.text),
 
         // optional fields
+        double.parse(priceCtrl.text),
         encodedImage,
+        double.parse(quantityCtrl.text),
         customerNameCtrl.text,
         customerContactNumberCtrl.text,
         notesCtrl.text,
@@ -336,6 +350,7 @@ class _ItemFormState extends State<ItemForm> {
       dbIsa.getItem(widget.id).then((result) {
         nameCtrl.text = result['name'];
         priceCtrl.text = result['price'].toString();
+        quantityCtrl.text = result['quantity'].toString();
         customerNameCtrl.text = result['customerName'];
         customerContactNumberCtrl.text = result['customerContactNumber'];
         notesCtrl.text = result['notes'];
@@ -346,12 +361,12 @@ class _ItemFormState extends State<ItemForm> {
               : Base64Decoder().convert(result['imageUrl']);
         });
       });
-    }
-
-    if (widget.imageBytes != null && widget.id == null) {
+    } else if (widget.imageBytes != null) {
       setState(() {
         image = widget.imageBytes;
       });
+    } else {
+      return;
     }
   }
 

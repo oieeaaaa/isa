@@ -8,6 +8,7 @@ class Item {
   String _name;
   double _price;
   String _imageUrl;
+  double _quantity;
 
   // customer information
   String _customerName;
@@ -22,15 +23,19 @@ class Item {
   // =========================================================================
 
   // without id
-  Item(this._name, this._price, this._createdAt,
-      [this._imageUrl,
+  Item(this._name, this._createdAt,
+      [this._price,
+      this._imageUrl,
+      this._quantity,
       this._customerName,
       this._customerContactNumber,
       this._notes]);
 
   // with id
-  Item.withId(this._id, this._name, this._price,
-      [this._imageUrl,
+  Item.withId(this._id, this._name,
+      [this._price,
+      this._imageUrl,
+      this._quantity,
       this._customerName,
       this._customerContactNumber,
       this._notes]);
@@ -43,6 +48,7 @@ class Item {
   String get name => _name;
   double get price => _price;
   String get imageUrl => _imageUrl;
+  double get quantity => _quantity;
   String get customerName => _customerName;
   String get customerContactNumber => _customerContactNumber;
   String get notes => _notes;
@@ -87,6 +93,7 @@ class Item {
       'name': _name,
       'price': _price,
       'imageUrl': _imageUrl,
+      'quantity': _quantity,
       'customerName': _customerName,
       'customerContactNumber': _customerContactNumber,
       'notes': _notes,
@@ -105,6 +112,7 @@ class Item {
     this._name = o['name'];
     this._price = o['price'];
     this._imageUrl = o['imageUrl'];
+    this._quantity = o['quantity'];
     this._customerName = o['customerName'];
     this._customerContactNumber = o['customerContactNumber'];
     this._notes = o['notes'];
