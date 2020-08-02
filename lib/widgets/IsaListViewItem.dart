@@ -48,7 +48,7 @@ class IsaListViewItem extends StatelessWidget {
                         ? Image.memory(
                             _bytesImage,
                           )
-                        : Icon(Icons.camera_alt),
+                        : Icon(Icons.image),
                   ),
                 )),
             Container(
