@@ -101,8 +101,6 @@ class DBProvider {
     String startDate = range[0].toString();
     String endDate = range[0].toString();
 
-    print(range);
-
     List<Map<String, dynamic>> result = await db.query(
       tableName,
       where: '$createdAt >= ? and ? <= ?',

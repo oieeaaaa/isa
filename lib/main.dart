@@ -15,10 +15,24 @@ class MainModel extends ChangeNotifier {
   // Obtain a list of the available cameras on the device.
   CameraDescription camera = CameraDescription();
 
+  // date range
+  List<DateTime> selectedRange = [
+    DateTime.now(),
+    (DateTime.now()).add(Duration(days: 7))
+  ];
+
   MainModel() {
     availableCameras().then((cameras) {
       this.camera = cameras.first;
     });
+
+    this.selectedRange = selectedRange;
+  }
+
+  void updateSelectedRange(List<DateTime> newSelectedRange) {
+    this.selectedRange = newSelectedRange;
+
+    notifyListeners();
   }
 }
 

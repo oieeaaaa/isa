@@ -12,9 +12,9 @@ class IsaListViewItem extends StatelessWidget {
   final id;
   final imageUrl;
   final name;
-  final price;
+  final quantity;
 
-  IsaListViewItem(this.id, this.imageUrl, this.name, this.price);
+  IsaListViewItem(this.id, this.imageUrl, this.name, this.quantity);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class IsaListViewItem extends StatelessWidget {
                         .copyWith(fontSize: 18))),
             Container(
               width: MediaQuery.of(context).size.width * 0.193236715,
-              child: Text('${this.price.toString()}',
+              child: Text('${this.quantity.toString()}',
                   textAlign: TextAlign.end,
                   style: Theme.of(context)
                       .textTheme

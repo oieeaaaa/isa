@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:provider/provider.dart';
 
 import './IsaListViewHeader.dart';
 import './IsaListViewHeading.dart';
 import './IsaListViewItem.dart';
 import '../helpers/dbProvider.dart';
+import '../main.dart';
 
 // =========================================================================
 // Isa ListView
@@ -35,11 +37,11 @@ class _IsaListViewState extends State<IsaListView> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
-        IsaListViewHeader(this.fetchItems, this.sendReport),
+        IsaListViewHeader(this.fetchItems, this.sendReport, this.items.length),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           IsaListViewHeading('image', 0.1449275362),
           IsaListViewHeading('name', 0.38647343),
-          IsaListViewHeading('price', 0.193236715, TextAlign.end),
+          IsaListViewHeading('quantity', 0.193236715, TextAlign.end),
         ]),
         SizedBox(height: 20),
         if (items.length != 0) ...generateItems(items),
@@ -63,14 +65,17 @@ class _IsaListViewState extends State<IsaListView> {
     return data.map<Widget>((item) {
       return Column(children: [
         IsaListViewItem(item['id'], item['imageUrl'], item['name'] ?? 'N/A',
-                item['price'].toString()) ??
+                item['quantity'].toString()) ??
             '0.00',
         SizedBox(height: 20),
       ]);
     }).toList();
   }
 
-  Future sendToEmail() async {
+  Future sendToEmail(List<DateTime> range) async {
+    DateFormat dateyMdyWithDash = DateFormat('M-d-y');
+    DateFormat dateyMMMd = DateFormat.yMMMd();
+
     // convert map to list
     // because csv accepts nested list
     List<List<dynamic>> listItems = List.generate(items.length, (index) {
@@ -106,7 +111,10 @@ class _IsaListViewState extends State<IsaListView> {
     ]);
 
     final String dir = (await getApplicationSupportDirectory()).path;
-    final String path = '$dir/report.csv';
+    final String dateRange =
+        '${dateyMdyWithDash.format(range[0])}---${dateyMdyWithDash.format(range[1])}';
+
+    final String path = '$dir/$dateRange.csv';
     final File file = File(path);
 
     // write the data
@@ -114,7 +122,8 @@ class _IsaListViewState extends State<IsaListView> {
 
     final Email email = Email(
       body: 'See the attachment',
-      subject: 'Sales report',
+      subject:
+          'Report: ${dateyMMMd.format(range[0])} to ${dateyMMMd.format(range[1])}',
       recipients: [emailCtrl.text],
       attachmentPaths: [path],
       isHTML: false,
@@ -122,21 +131,15 @@ class _IsaListViewState extends State<IsaListView> {
 
     try {
       await FlutterEmailSender.send(email);
-
+    } catch (error) {
       await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Text('Email is sent to ${emailCtrl.text} ✅',
+                title: Text('Failed to send email',
                     style: Theme.of(context).textTheme.bodyText1));
           });
-    } catch (error) {
-      print(error.toString());
     }
-
-    setState(() {
-      emailCtrl.text = '';
-    });
 
     Navigator.of(context).pop();
   }
@@ -158,14 +161,12 @@ class _IsaListViewState extends State<IsaListView> {
                   Text('Send Report:',
                       style: Theme.of(context)
                           .textTheme
-                          .bodyText1
-                          .copyWith(fontSize: 24)),
-                  SizedBox(height: 20),
-                  Text('Start Date: ${dateFormat.format(selectedRange[0])}',
-                      style: Theme.of(context).textTheme.bodyText2),
+                          .bodyText2
+                          .copyWith(fontSize: 18)),
                   SizedBox(height: 10),
-                  Text('End Date: ${dateFormat.format(selectedRange[1])}',
-                      style: Theme.of(context).textTheme.bodyText2),
+                  Text(
+                      '${dateFormat.format(selectedRange[0])} - ${dateFormat.format(selectedRange[1])}',
+                      style: Theme.of(context).textTheme.bodyText1),
                 ],
               ),
               content: Container(
@@ -223,7 +224,7 @@ class _IsaListViewState extends State<IsaListView> {
                             child: FlatButton(
                               splashColor: Colors.white.withAlpha(100),
                               color: Theme.of(context).primaryColor,
-                              onPressed: sendToEmail,
+                              onPressed: () => sendToEmail(selectedRange),
                               child: Text('Send',
                                   style: Theme.of(context)
                                       .textTheme
@@ -247,6 +248,7 @@ class _IsaListViewState extends State<IsaListView> {
   void initState() {
     super.initState();
 
-    this.fetchItems([DateTime.now(), (DateTime.now()).add(Duration(days: 7))]);
+    this.fetchItems(
+        Provider.of<MainModel>(context, listen: false).selectedRange);
   }
 }

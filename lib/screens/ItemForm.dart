@@ -38,10 +38,9 @@ class _ItemFormState extends State<ItemForm> {
 
   // Ctrl stands for Controller
   TextEditingController nameCtrl = TextEditingController();
-  TextEditingController priceCtrl = TextEditingController.fromValue(
-      TextEditingValue(text: '0')); // with an initial value
+  TextEditingController priceCtrl = TextEditingController();
   TextEditingController quantityCtrl = TextEditingController.fromValue(
-      TextEditingValue(text: '0')); // with an initial value
+      TextEditingValue(text: '1')); // with an initial value
   TextEditingController customerNameCtrl = TextEditingController();
   TextEditingController customerContactNumberCtrl = TextEditingController();
   TextEditingController notesCtrl = TextEditingController();
@@ -273,10 +272,9 @@ class _ItemFormState extends State<ItemForm> {
         DateTime.now().toString(),
 
         // optional fields
-
-        double.parse(priceCtrl.text),
+        priceCtrl.text != '' ? double.parse(priceCtrl.text) : null,
         encodedImage,
-        double.parse(quantityCtrl.text),
+        quantityCtrl.text != '' ? double.parse(quantityCtrl.text) : null,
         customerNameCtrl.text,
         customerContactNumberCtrl.text,
         notesCtrl.text,
@@ -304,9 +302,9 @@ class _ItemFormState extends State<ItemForm> {
         nameCtrl.text,
 
         // optional fields
-        double.parse(priceCtrl.text),
+        priceCtrl.text != '' ? double.parse(priceCtrl.text) : null,
         encodedImage,
-        double.parse(quantityCtrl.text),
+        quantityCtrl.text != '' ? double.parse(quantityCtrl.text) : null,
         customerNameCtrl.text,
         customerContactNumberCtrl.text,
         notesCtrl.text,
@@ -349,7 +347,8 @@ class _ItemFormState extends State<ItemForm> {
     if (widget.id != null) {
       dbIsa.getItem(widget.id).then((result) {
         nameCtrl.text = result['name'];
-        priceCtrl.text = result['price'].toString();
+        priceCtrl.text =
+            result['price'] != null ? result['price'].toString() : '';
         quantityCtrl.text = result['quantity'].toString();
         customerNameCtrl.text = result['customerName'];
         customerContactNumberCtrl.text = result['customerContactNumber'];
